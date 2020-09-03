@@ -13,7 +13,16 @@ ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 # NEVER TOUCH PORT 1 OR 49 <--------------------
 # Connect to each IP in your file
 # The Path should be to a .txt file that has all cisco equipment IP's w/SSH
-with open(r"FILE_PATH_W/IP_ADDRESSES")as ip_file: # <----- This script can only handle one IP, I want to make it handle multiple with an IP per line of txt & std the output
+
+Filepath = r"C:\Users\REPAIRMAN\Desktop\SwitchIP.txt"
+
+with open(Filepath)as ip_file:
+    line = ip_file.readline()
+    cnt = 1
+    while line:
+        print("Line {}: {}".format(cnt, line.strip()))
+        line = ip_file.readline()
+        cnt += 1
     for ip_address in ip_file:
           ssh_client.connect(hostname=ip_address,username=username,password=password)
 
