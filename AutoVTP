@@ -2,20 +2,20 @@ import os
 import paramiko
 import time
 
-username = "xxx"
-password = "xxx"
+username = "xx"
+password = "xx"
 
+#User prompt
 if input("are you sure? (y/n)") != "y":
       exit()
       
+#Declare and setup ssh shell     
 ssh_client = paramiko.SSHClient()
 ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-# NEVER TOUCH PORT 1 OR 49 <--------------------
-# Connect to each IP in your file
-# The Path should be to a .txt file that has all cisco equipment IP's w/SSH
 
-Filepath = r"C:\Users\REPAIRMAN\Desktop\SwitchIP.txt"
-
+#Filepath
+Filepath = r"FILE PATH"
+#Loop to cycle through IPs
 with open(Filepath)as ip_file:
     line = ip_file.readline()
     cnt = 1
@@ -23,30 +23,32 @@ with open(Filepath)as ip_file:
         print("Line {}: {}".format(cnt, line.strip()))
         line = ip_file.readline()
         cnt += 1
-    for ip_address in ip_file:
-          ssh_client.connect(hostname=ip_address,username=username,password=password)
+        #INVOKE SHELL
+        ssh_client.connect(hostname=line,username=username,password=password)
+        remote_connection = ssh_client.invoke_shell()
+        #Verify connection
+        print ("Successful connection", ip_address)
+        time.sleep(2)
+        remote_connection.send("enable\n")
+        time.sleep(2)
+        remote_connection.send("ENABLE-PASS\n")
+        time.sleep(2)
+        remote_connection.send("conf t\n")
+        time.sleep(2)
+        remote_connection.send("vtp mode client\n")
+        time.sleep(2)
+        remote_connection.send("vtp domain domain\n")
+        time.sleep(2)
+        remote_connection.send("vtp password vtp-pass\n")
+        time.sleep(2)
+        remote_connection.send("exit\n")
+        time.sleep(2)
+        #Save changes
+        remote_connection.send("wr\n")
+        time.sleep(7)
+        output = remote_connection.recv(65535)          
+        Format = output.decode(encoding='UTF-8')
+        print(Format)
+        print ("Config Edited Successfully")
+        ssh_client.close
 
-          print ("Successful connection", ip_address)
-          remote_connection = ssh_client.invoke_shell()
-          time.sleep(2)
-          remote_connection.send("enable\n")
-          time.sleep(2)
-          remote_connection.send("ENABLE_PASS\n")
-          time.sleep(2)
-          remote_connection.send("conf t\n")
-          time.sleep(2)
-          remote_connection.send("vtp mode client\n")
-          time.sleep(2)
-          remote_connection.send("vtp domain VTP_DOMAIN\n")
-          time.sleep(2)
-          remote_connection.send("vtp password VTP_PASS\n")
-          time.sleep(2)
-          remote_connection.send("exit\n")
-          time.sleep(2)
-          remote_connection.send("wr\n")
-          time.sleep(7)
-          output = remote_connection.recv(65535)          
-          Format = output.decode(encoding='UTF-8')
-          print(Format)
-          print ("Config Edited Successfully")
-          ssh_client.close
